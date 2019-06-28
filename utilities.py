@@ -1,6 +1,7 @@
 from data import data_access
 import make_request
 from model import Team, League
+import time
 
 
 def resolve_hero(hero_id):
@@ -29,10 +30,13 @@ def resolve_team(team_id, team_name):
 
 
 def resolve_player_name(account_id):
-    players = make_request.get_player_info()['player_infos']
-    for player in players:
+    players = make_request.get_player_info()
+    if players is None:
+        return False
+    for player in players['player_infos']:
         if player['account_id'] == account_id:
             return player['name']
+    return 'Unknown Standin'
 
 
 def resolve_league(league_id):
@@ -52,11 +56,9 @@ def is_potential_final_game(number, team_one_score, team_two_score):
     return False
 
 
-def did_radiant_win(match_id):
-    return make_request.get_match_details(match_id)['radiant_win']
-
-
 def resolve_series_type(series_type):
+    if series_type == 0:
+        return 1
     if series_type == 1:
         return 3
     if series_type == 2:
@@ -99,7 +101,7 @@ def game_is_tracked(live_match):
 
 def match_has_disappeared(live_matches, series):
     for live_match in live_matches:
-        if series.matches[-1].match_id == live_match.match_id:
+        if series.live_matches[-1].match_id == live_match.match_id:
             return False
     return True
 
@@ -116,9 +118,11 @@ def get_teams_that_could_win(series):
 
 def get_series_winner(series):
     latest_match = make_request.get_match_details(series.live_matches[-1].match_id)
-    teams_that_could_win = get_teams_that_could_win(series)
-    for team in teams_that_could_win:
-        if latest_match['radiant_win'] and latest_match['radiant_team_id'] == team.team_id or \
-                not latest_match['radiant_win'] and latest_match['dire_team_id'] == team.team_id:
-            return team
-    return False  # Series isn't over, wait for the next game.
+    if latest_match is not False:
+        teams_that_could_win = get_teams_that_could_win(series)
+        for team in teams_that_could_win:
+            if latest_match['radiant_win'] and latest_match['radiant_team_id'] == team.team_id or \
+                    not latest_match['radiant_win'] and latest_match['dire_team_id'] == team.team_id:
+                return team
+        return False  # Series isn't over, wait for the next game.
+    return False

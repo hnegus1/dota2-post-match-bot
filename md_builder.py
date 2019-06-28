@@ -192,6 +192,8 @@ def build_markdown(series):
             f' {link("Stratz", f"https://stratz.com/en-us/match/{match.match_id}")}'
         markdown += line_break()
         markdown += divider()
+    markdown += line_break()
+    markdown += italics('This action was performed by a bot. For more information, [see here](https://www.reddit.com/user/d2-match-bot-speaks/comments/c26lfw/introducing_the_dota_2_post_match_bot/). Contact: /u/d2-match-bot-speaks')
     return {'markdown': markdown,
             'title': f'{series.team_one.team.name} vs {series.team_two.team.name} / '
             f'{series.league.name} / Post-Match Discussion',

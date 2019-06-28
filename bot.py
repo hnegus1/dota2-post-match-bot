@@ -28,9 +28,11 @@ def operate_bot():
     if series is not False:
         try:
             print(series['markdown'])
+            print()
             subreddit.submit(
                 series['title'],
-                series['markdown']
+                series['markdown'],
+                spoiler=True,
             )
         except prawcore.exceptions.ServerError:
             print('praw threw servererror, skipping')

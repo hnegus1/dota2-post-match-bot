@@ -1,6 +1,7 @@
 import json
 import os
 
+
 def open_json_file_r(path):
     with open(os.getcwd() + path, 'r') as f:
         return json.load(f)
@@ -118,6 +119,7 @@ def track_new_series(live_match):
                     },
                     'score': live_match.dire_live_team.score
                 },
+                'series_type': live_match.series_type
             }
         ]
     })
@@ -129,7 +131,7 @@ def track_new_match(live_match, series_id):
     live_games = open_json_file_r('/data/tracked_series.json')
     for index, series in enumerate(live_games):
         if series['series_id'] == series_id:
-            live_games[index]['matches'].append({
+            live_games[index]['live_matches'].append({
                 'radiant_live_team': {
                     'team': {
                         'name': live_match.radiant_live_team.team.name,
@@ -147,10 +149,12 @@ def track_new_match(live_match, series_id):
                     'score': live_match.dire_live_team.score
                 },
                 'match_id': live_match.match_id,
-                'series_type': live_match.series_type
+                'series_type': live_match.series_type,
+                'league': {
+                    'league_id': live_match.league.league_id,
+                    'name': live_match.league.name
+                },
             })
-        else:
-            raise Exception(f'Series {series_id} not found in tracked_series.json')
     json.dumps(live_games)
     open_json_file_w('/data/tracked_series.json', live_games)
 

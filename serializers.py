@@ -1,22 +1,26 @@
 import utilities as util
 from model import Match, Player, PickBan, Series, LiveMatch, LiveTeam, LiveSeries
 import make_request
+import time
 
 
 def serialize_live_match_valve(match):
-    return LiveMatch.LiveMatch(
-        match_id=match['match_id'],
-        league=util.resolve_league(match['league_id']),
-        radiant_live_team=LiveTeam.LiveTeam(
-            team=util.resolve_team(match['radiant_team']['team_id'], match['radiant_team']['team_name']),
-            score=match['radiant_series_wins']
-        ),
-        dire_live_team=LiveTeam.LiveTeam(
-            team=util.resolve_team(match['dire_team']['team_id'], match['dire_team']['team_name']),
-            score=match['dire_series_wins']
-        ),
-        series_type=util.resolve_series_type(match['series_type'])
-    )
+    try:
+        return LiveMatch.LiveMatch(
+            match_id=match['match_id'],
+            league=util.resolve_league(match['league_id']),
+            radiant_live_team=LiveTeam.LiveTeam(
+                team=util.resolve_team(match['radiant_team']['team_id'], match['radiant_team']['team_name']),
+                score=match['radiant_series_wins']
+            ),
+            dire_live_team=LiveTeam.LiveTeam(
+                team=util.resolve_team(match['dire_team']['team_id'], match['dire_team']['team_name']),
+                score=match['dire_series_wins']
+            ),
+            series_type=util.resolve_series_type(match['series_type'])
+        )
+    except KeyError:
+        return None
 
 
 def serialize_live_match_match_bot(match):
@@ -37,7 +41,7 @@ def serialize_live_match_match_bot(match):
             ),
             score=match['dire_live_team']['score']
         ),
-        series_type=util.resolve_series_type(match['series_type'])
+        series_type=match['series_type']
     )
 
 
@@ -67,15 +71,23 @@ def serialize_live_series(series):
 def serialize_series_from_live_series(live_series):
     matches = []
     for live_match in live_series.live_matches:
-        matches.append(make_request.get_match_details(live_match.match_id))
-    to_return = Series.Series(
-        series_id=live_series.series_id,
-        league=live_series.league,
-        team_one=live_series.live_team_one,
-        team_two=live_series.live_team_two,
-        type=live_series.series_type,
-        matches=list(map(serialize_match, matches))
-    )
+        m = make_request.get_match_details(live_match.match_id)
+        if m is not False:
+            matches.append(m)
+    try:
+        to_return = Series.Series(
+            series_id=live_series.series_id,
+            league=live_series.league,
+            team_one=live_series.live_team_one,
+            team_two=live_series.live_team_two,
+            type=live_series.series_type,
+            matches=list(map(serialize_match, matches))
+        )
+    except Exception as e:
+        if e == 'ValveApiDown':
+            return False
+        else:
+            raise e
     if to_return.matches[-1].winner.team_id == to_return.team_one.team.team_id:
         to_return.team_one.score += 1
     else:
@@ -95,9 +107,11 @@ def serialize_match(match):
                 else:
                     items.append('')
             return items
-
+        name = util.resolve_player_name(player['account_id'])
+        if name is False:
+            raise Exception('ValveApiDown')
         return Player.Player(
-            name=util.resolve_player_name(player['account_id']),
+            name=name,
             hero=util.resolve_hero(player['hero_id']),
             items=serialize_items(),
             kills=player['kills'],
@@ -128,7 +142,6 @@ def serialize_match(match):
             order=pick_ban['order'],
             team=team
         )
-
     return Match.Match(
         match_id=match['match_id'],
         radiant=radiant,

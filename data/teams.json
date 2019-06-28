@@ -187,11 +187,16 @@
   {
     "name": "Virtus.pro",
     "team_id": 1883502,
-    "team_logo": "[](/logo-vp \"Virtus.pro\")"
+    "team_logo": "[](/logo-virtus \"Virtus.pro\")"
   },
   {
     "name": "WarriorsGaming.Unity",
     "team_id": 2659468,
     "team_logo": "[](/logo-wg \"WarriorGaming.Unity\")"
+  },
+  {
+    "name": "Infamous Gaming",
+    "team_id": 2672298,
+    "team_logo": "[](/logo-dota \"\")"
   }
 ]

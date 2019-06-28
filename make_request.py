@@ -12,11 +12,14 @@ def make_request_dota2(**kwargs):
         time.sleep(1)
 
     # Init URL + headers
-    headers = {'User-Agent': 'Dota2-Post-Match-Bot (Testing for now) | /u/d2-match-bot-speaks'}
+    headers = {'User-Agent': 'Dota2-Post-Match-Bot | /u/d2-match-bot-speaks'}
 
     # No API key is needed for doing it by the Dota 2 website API
     # This is probably Not Allowed.
-    return requests.get(kwargs['url'], headers=headers).json()
+    try:
+        return requests.get(kwargs['url'], headers=headers).json()
+    except:
+        return False
 
 
 def make_request(**kwargs):
@@ -25,7 +28,7 @@ def make_request(**kwargs):
         time.sleep(1)
 
     # Init URL + headers
-    headers = {'User-Agent': 'Dota2-Post-Match-Bot (Testing for now) | /u/d2-match-bot-speaks'}
+    headers = {'User-Agent': 'Dota2-Post-Match-Bot | /u/d2-match-bot-speaks'}
     request = f'{kwargs["url"]}?key={api_key}'
 
     # Handle parameters
@@ -39,22 +42,36 @@ def make_request(**kwargs):
     # Fire the request - update the time of the last request
     response = requests.get(request)
     data_access.update_config('last_request', time.time())
-    return response.json()
+    try:
+        return response.json()
+    except:
+        return False
 
 
 def get_live_league_matches():
-    return make_request(url='http://api.steampowered.com/IDOTA2Match_570/GetLiveLeagueGames/v1/')['result']['games']
+    request = make_request(url='http://api.steampowered.com/IDOTA2Match_570/GetLiveLeagueGames/v1/')['result']
+    if 'error' in request.keys():
+        return False
+    return request['games']
 
 
 def get_match_details(match_id):
-    return make_request(
-        url='http://api.steampowered.com/IDOTA2Match_570/GetMatchDetails/v1/',
-        parameters={'match_id': match_id}
-    )['result']
+    try:
+        request = make_request(
+            url='http://api.steampowered.com/IDOTA2Match_570/GetMatchDetails/v1/',
+            parameters={'match_id': match_id}
+        )['result']
+        if 'error' in request.keys():
+            return False
+        return request
+    except KeyError:
+        return False
 
 
 def get_player_info():
-    return make_request_dota2(url='https://www.dota2.com/webapi/IDOTA2Fantasy/GetProPlayerInfo/v0001/')
-
+    request = make_request_dota2(url='https://www.dota2.com/webapi/IDOTA2Fantasy/GetProPlayerInfo/v0001/')
+    if request is None:
+        return False
+    return request
 
 # print(json.dumps(get_live_league_games(), indent=4, sort_keys=True))
