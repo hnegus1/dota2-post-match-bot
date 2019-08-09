@@ -2,8 +2,8 @@ import praw
 import praw.exceptions
 import prawcore
 import time
-import dota_parser
 import re
+import dota_parser
 from data import data_access
 
 r = praw.Reddit(client_id=data_access.get_config("bot_client_id"),
@@ -13,6 +13,15 @@ r = praw.Reddit(client_id=data_access.get_config("bot_client_id"),
                 username='dota2-post-match-bot')
 
 subreddit = r.subreddit('dota2')
+twitch_clip_bot = r.redditor('DotaClipMatchFinder')
+# for comment in twitch_clip_bot.comments.new():
+#     if str(match) in comment.body:
+#         print(f'{comment.submission.title} - {comment.submission.url}')
+
+
+def get_twitch_clips(match_id):
+    return [x for x in list(map(lambda comment: f'[{comment.submission.title}]({comment.submission.url})'
+            if str(match_id) in comment.body else None, twitch_clip_bot.comments.new())) if x]
 
 
 def run_bot():
@@ -46,4 +55,4 @@ def operate_bot():
             data_access.stop_tracking_series(series['series_id'])
 
 
-run_bot()
+# run_bot()

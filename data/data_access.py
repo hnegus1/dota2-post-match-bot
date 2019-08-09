@@ -159,10 +159,10 @@ def track_new_match(live_match, series_id):
     open_json_file_w('/data/tracked_series.json', live_games)
 
 
-def stop_tracking_series(series_id):
+def stop_tracking_series(league_node_id):
     live_games = open_json_file_r('/data/tracked_series.json')
-    for index, series in enumerate(live_games):
-        if series['series_id'] == series_id:
+    for index, match in enumerate(live_games):
+        if match['league_node_id'] == league_node_id:
             del live_games[index]
     json.dumps(live_games)
     open_json_file_w('/data/tracked_series.json', live_games)
@@ -183,3 +183,11 @@ def update_series_wins(team_one_win_count, team_two_win_count, series_id):
             series['live_team_two']['score'] = team_two_win_count
     json.dumps(live_games)
     open_json_file_w('/data/tracked_series.json', live_games)
+
+
+def track_match_node(**kwargs):
+    live_games = open_json_file_r('/data/tracked_series.json')
+    live_games.append(kwargs)
+    json.dumps(live_games)
+    open_json_file_w('/data/tracked_series.json', live_games)
+
