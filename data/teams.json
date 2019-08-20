@@ -85,9 +85,9 @@
     "team_logo": "[](/logo-fnatic \"Fnatic\")"
   },
   {
-    "name": "Forward Gaming",
+    "name": "Newbee",
     "team_id": 6214538,
-    "team_logo": "[](/logo-forward \"Forward Gaming\")"
+    "team_logo": "[](/logo-newbee \"Newbee\")"
   },
   {
     "name": "Gambit Esports",
@@ -197,6 +197,211 @@
   {
     "name": "Infamous Gaming",
     "team_id": 2672298,
+    "team_logo": "[](/logo-infamous \"Infamous\")"
+  },
+  {
+    "name": "beastcoast",
+    "team_id": 7079109,
     "team_logo": "[](/logo-dota \"\")"
+  },
+  {
+    "name": "Invalid Team",
+    "team_id": 0,
+    "team_logo": "[](/logo-dota \"\")"
+  },
+  {
+    "name": "Black Sheep!",
+    "team_id": 1366506,
+    "team_logo": "[](/logo-dota \"Black Sheep!\")"
+  },
+  {
+    "name": "Team Xolotl",
+    "team_id": 5892936,
+    "team_logo": "[](/logo-dota \"Team Xolotl\")"
+  },
+  {
+    "name": "Young Drug Gaming",
+    "team_id": 7119039,
+    "team_logo": "[](/logo-dota \"Young Drug Gaming\")"
+  },
+  {
+    "name": "Midas Club ",
+    "team_id": 3477208,
+    "team_logo": "[](/logo-dota \"Midas Club \")"
+  },
+  {
+    "name": "Gorillaz-Pride",
+    "team_id": 5055770,
+    "team_logo": "[](/logo-dota \"Gorillaz-Pride\")"
+  },
+  {
+    "name": "SG e-sports",
+    "team_id": 5679840,
+    "team_logo": "[](/logo-dota \"SG e-sports\")"
+  },
+  {
+    "name": "freestyle",
+    "team_id": 7101383,
+    "team_logo": "[](/logo-dota \"freestyle\")"
+  },
+  {
+    "name": "EGOBOYS",
+    "team_id": 7119077,
+    "team_logo": "[](/logo-dota \"EGOBOYS\")"
+  },
+  {
+    "name": "Team Singularity",
+    "team_id": 6711290,
+    "team_logo": "[](/logo-dota \"Team Singularity\")"
+  },
+  {
+    "name": "Aachen City Esports",
+    "team_id": 7019882,
+    "team_logo": "[](/logo-dota \"Aachen City Esports\")"
+  },
+  {
+    "name": "FlyToMoon",
+    "team_id": 6953913,
+    "team_logo": "[](/logo-dota \"FlyToMoon\")"
+  },
+  {
+    "name": "Black Hornets Gaming",
+    "team_id": 6979938,
+    "team_logo": "[](/logo-dota \"Black Hornets Gaming\")"
+  },
+  {
+    "name": "Team Spirit",
+    "team_id": 7119388,
+    "team_logo": "[](/logo-dota \"Team Spirit\")"
+  },
+  {
+    "name": "Keen Gaming",
+    "team_id": 2626685,
+    "team_logo": "[](/logo-keen \"Keen Gaming\")"
+  },
+  {
+    "name": "Team EVOS",
+    "team_id": 3262331,
+    "team_logo": "[](/logo-dota \"Team EVOS\")"
+  },
+  {
+    "name": "Geek Fam",
+    "team_id": 3586078,
+    "team_logo": "[](/logo-dota \"Geek Fam\")"
+  },
+  {
+    "name": "Warriors Gaming",
+    "team_id": 7118594,
+    "team_logo": "[](/logo-dota \"Warriors Gaming\")"
+  },
+  {
+    "name": "Power of MYSG+AU",
+    "team_id": 7119284,
+    "team_logo": "[](/logo-dota \"Power of MYSG+AU\")"
+  },
+  {
+    "name": "Unknown Team",
+    "team_id": 7247584,
+    "team_logo": "[](/logo-dota \"Unknown Team\")"
+  },
+  {
+    "name": "Old Suck Gaming",
+    "team_id": 7234776,
+    "team_logo": "[](/logo-dota \"Old Suck Gaming\")"
+  },
+  {
+    "name": "Unknown Team",
+    "team_id": 7233180,
+    "team_logo": "[](/logo-dota \"Unknown Team\")"
+  },
+  {
+    "name": "Unknown Team",
+    "team_id": 6382242,
+    "team_logo": "[](/logo-dota \"Unknown Team\")"
+  },
+  {
+    "name": "Furia",
+    "team_id": 7220281,
+    "team_logo": "[](/logo-dota \"Furia\")"
+  },
+  {
+    "name": "Chaos Esports Club",
+    "team_id": 7203342,
+    "team_logo": "[](/logo-chaos \"Chaos\")"
+  },
+  {
+    "name": "Hippomaniacs",
+    "team_id": 3214090,
+    "team_logo": "[](/logo-dota \"Hippomaniacs\")"
+  },
+  {
+    "name": "Bald",
+    "team_id": 7237270,
+    "team_logo": "[](/logo-dota \"Bald\")"
+  },
+  {
+    "name": "Unknown Team",
+    "team_id": 7247564,
+    "team_logo": "[](/logo-dota \"Unknown Team\")"
+  },
+  {
+    "name": "Unknown Team",
+    "team_id": 7247949,
+    "team_logo": "[](/logo-dota \"Unknown Team\")"
+  },
+  {
+    "name": "Unknown Team",
+    "team_id": 7247587,
+    "team_logo": "[](/logo-dota \"Unknown Team\")"
+  },
+  {
+    "name": "Nemiga Gaming",
+    "team_id": 5014799,
+    "team_logo": "[](/logo-dota \"Nemiga Gaming\")"
+  },
+  {
+    "name": "CDEC ",
+    "team_id": 1520578,
+    "team_logo": "[](/logo-dota \"CDEC \")"
+  },
+  {
+    "name": "Team Jinesbrus",
+    "team_id": 7225724,
+    "team_logo": "[](/logo-dota \"Team Jinesbrus\")"
+  },
+  {
+    "name": "Adroit",
+    "team_id": 7098928,
+    "team_logo": "[](/logo-dota \"Adroit\")"
+  },
+  {
+    "name": "496 Gaming",
+    "team_id": 4817649,
+    "team_logo": "[](/logo-dota \"496 Gaming\")"
+  },
+  {
+    "name": "AMPLFY",
+    "team_id": 6797380,
+    "team_logo": "[](/logo-dota \"AMPLFY\")"
+  },
+  {
+    "name": "RESURGENCE",
+    "team_id": 6765426,
+    "team_logo": "[](/logo-dota \"RESURGENCE\")"
+  },
+    {
+    "name": "Chaos Esports Club",
+    "team_id": 6666989,
+    "team_logo": "[](/logo-chaos \"Chaos\")"
+  },
+  {
+    "name": "All Star A",
+    "team_id": 6143735,
+    "team_logo": "[](/logo-dota \"All Star A\")"
+  },
+  {
+    "name": "All Star B",
+    "team_id": 6143737,
+    "team_logo": "[](/logo-dota \"All Star B\")"
   }
 ]
