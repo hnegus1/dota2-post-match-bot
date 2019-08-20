@@ -85,9 +85,9 @@
     "team_logo": "[](/logo-fnatic \"Fnatic\")"
   },
   {
-    "name": "Forward Gaming",
+    "name": "Newbee",
     "team_id": 6214538,
-    "team_logo": "[](/logo-forward \"Forward Gaming\")"
+    "team_logo": "[](/logo-newbee \"Newbee\")"
   },
   {
     "name": "Gambit Esports",
@@ -197,7 +197,7 @@
   {
     "name": "Infamous Gaming",
     "team_id": 2672298,
-    "team_logo": "[](/logo-dota \"\")"
+    "team_logo": "[](/logo-infamous \"Infamous\")"
   },
   {
     "name": "beastcoast",
@@ -275,9 +275,9 @@
     "team_logo": "[](/logo-dota \"Team Spirit\")"
   },
   {
-    "name": "KEEN GAMING",
+    "name": "Keen Gaming",
     "team_id": 2626685,
-    "team_logo": "[](/logo-dota \"KEEN GAMING\")"
+    "team_logo": "[](/logo-keen \"Keen Gaming\")"
   },
   {
     "name": "Team EVOS",
@@ -325,9 +325,9 @@
     "team_logo": "[](/logo-dota \"Furia\")"
   },
   {
-    "name": "Unknown Team",
+    "name": "Chaos Esports Club",
     "team_id": 7203342,
-    "team_logo": "[](/logo-dota \"Unknown Team\")"
+    "team_logo": "[](/logo-chaos \"Chaos\")"
   },
   {
     "name": "Hippomaniacs",
@@ -388,5 +388,20 @@
     "name": "RESURGENCE",
     "team_id": 6765426,
     "team_logo": "[](/logo-dota \"RESURGENCE\")"
+  },
+    {
+    "name": "Chaos Esports Club",
+    "team_id": 6666989,
+    "team_logo": "[](/logo-chaos \"Chaos\")"
+  },
+  {
+    "name": "All Star A",
+    "team_id": 6143735,
+    "team_logo": "[](/logo-dota \"All Star A\")"
+  },
+  {
+    "name": "All Star B",
+    "team_id": 6143737,
+    "team_logo": "[](/logo-dota \"All Star B\")"
   }
 ]

@@ -2,6 +2,7 @@ import requests
 import json
 from data import data_access
 import time
+import utilities as util
 
 api_key = data_access.get_config("valve_api_key")
 
@@ -78,11 +79,14 @@ def make_request_dat_dota(**kwargs):
 
 
 def get_live_league_matches(league_id):
-    request = make_request(url='http://api.steampowered.com/IDOTA2Match_570/GetLiveLeagueGames/v1/',
-                           parameters={'league_id': str(league_id)})['result']
-    if 'error' in request.keys():
-        return False
-    return request['games']
+    try:
+        request = make_request(url='http://api.steampowered.com/IDOTA2Match_570/GetLiveLeagueGames/v1/',
+                               parameters={'league_id': str(league_id)})['result']
+        if 'error' in request.keys():
+            return False
+        return request['games']
+    except TypeError:
+        return util.APIDownException
 
 
 def get_match_details(match_id):

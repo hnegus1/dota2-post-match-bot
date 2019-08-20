@@ -117,5 +117,5 @@ def raw(text):
 def md_list(py_list):
     list_builder = ''
     for x in py_list:
-        list_builder += f'* x' + line_break()
+        list_builder += f'* {x}' + line_break()
     return list_builder

@@ -3,7 +3,7 @@ import praw.exceptions
 import prawcore
 import time
 import re
-import dota_parser
+from dota_parser import track_live_series
 from data import data_access
 
 r = praw.Reddit(client_id=data_access.get_config("bot_client_id"),
@@ -14,14 +14,6 @@ r = praw.Reddit(client_id=data_access.get_config("bot_client_id"),
 
 subreddit = r.subreddit('dota2')
 twitch_clip_bot = r.redditor('DotaClipMatchFinder')
-# for comment in twitch_clip_bot.comments.new():
-#     if str(match) in comment.body:
-#         print(f'{comment.submission.title} - {comment.submission.url}')
-
-
-def get_twitch_clips(match_id):
-    return [x for x in list(map(lambda comment: f'[{comment.submission.title}]({comment.submission.url})'
-            if str(match_id) in comment.body else None, twitch_clip_bot.comments.new())) if x]
 
 
 def run_bot():
@@ -33,10 +25,11 @@ def run_bot():
 
 def operate_bot():
     # Go through all active leagues and check for any change in number of series.
-    series = dota_parser.track_live_series()
-    if series is not False:
+    series = track_live_series()
+    if series is not None:
         try:
             print(series['markdown'])
+            print(series['title'])
             print()
             subreddit.submit(
                 series['title'],
@@ -51,8 +44,6 @@ def operate_bot():
             time_to_sleep = (int(re.sub("\D", "", e.message)) * 60) - 60
             print(f'praw threw rate exception. Trying again in {time_to_sleep} seconds')
             time.sleep(time_to_sleep)
-        else:
-            data_access.stop_tracking_series(series['series_id'])
 
 
-# run_bot()
+run_bot()

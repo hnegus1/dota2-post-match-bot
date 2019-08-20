@@ -1,7 +1,6 @@
 import utilities as util
 import md_builder as md
 import time
-import bot
 import datetime
 
 
@@ -170,7 +169,7 @@ class Match:
         self.dire = Dire(**kwargs)
         self.pick_bans = list(map(lambda pick_ban: PickBan(**pick_ban), kwargs['picks_bans']))
         self.players = list(map(lambda player: Player(**player), kwargs['players']))
-        self.clips = bot.get_twitch_clips(self.match_id)
+        self.clips = util.get_twitch_clips(self.match_id)
 
 
 class LiveMatch:
@@ -266,7 +265,7 @@ class Series:
         self.matches = matches
         self.team_1 = node.team_1
         self.team_2 = node.team_2
-        self.title = f'{league.name} {node_group.name}s / {node.name} / Post-Match Discussion'
+        self.title = f'{league.name} {node_group.name} / {node.name} / Post-Match Crowd Discussion'
         self.team_1_standing = [x for x in list(map(lambda x: x if self.team_1.team_id == x.team.team_id else None, node_group.team_standings)) if x][0]
         self.team_2_standing = [x for x in list(map(lambda x: x if self.team_2.team_id == x.team.team_id else None, node_group.team_standings)) if x][0]
         self.winner = winner
@@ -276,26 +275,33 @@ class Series:
         if node_group.name == 'Playoff':
             incoming_node_1 = None
             incoming_node_2 = None
-            if self.node.incoming_node_id_1 is not None:
-                incoming_node_1 = util.get_league_node(league, self.node.incoming_node_id_1)
-                if datetime.datetime.fromtimestamp(self.node.actual_time).day == datetime.datetime.fromtimestamp(incoming_node_1.actual_time).day:
-                    # It's the same day so set another title
-                    self.title = f'{league.name} {node_group.name}s / Post-Match Discussion'
-            if self.node.incoming_node_id_2 is not None:
-                incoming_node_2 = util.get_league_node(league, self.node.incoming_node_id_2)
-                if datetime.datetime.fromtimestamp(self.node.actual_time).day == datetime.datetime.fromtimestamp(incoming_node_2.actual_time).day:
-                    # It's the same day so set another title
-                    self.title = f'{league.name} {node_group.name}s / Post-Match Discussion'
+        if self.node.incoming_node_id_1 is not None:
+            incoming_node_1 = util.get_league_node(league, self.node.incoming_node_id_1)
+            if datetime.datetime.fromtimestamp(self.node.actual_time).day == datetime.datetime.fromtimestamp(incoming_node_1.actual_time).day:
+                # It's the same day so set another title
+                self.title = f'{league.name} {node_group.name} / Post-Match Discussion'
+        if self.node.incoming_node_id_2 is not None:
+            incoming_node_2 = util.get_league_node(league, self.node.incoming_node_id_2)
+            if datetime.datetime.fromtimestamp(self.node.actual_time).day == datetime.datetime.fromtimestamp(incoming_node_2.actual_time).day:
+                # It's the same day so set another title
+                self.title = f'{league.name} {node_group.name} / Post-Match Discussion'
 
         if self.winner.team_id == self.team_1.team_id:
-            self.node.team_1_wins += 1
+            if util.resolve_node_type(self.node.node_type) == 2 and self.node.team_1_wins == 0:
+                self.node.team_1_wins += 1
+            elif self.node.team_1_wins != util.resolve_node_type(self.node.node_type):
+                self.node.team_1_wins += 1
+
             self.loser = self.team_2
         else:
-            self.node.team_2_wins += 1
+            if self.node.team_2_wins != util.resolve_node_type(self.node.node_type):
+                self.node.team_2_wins += 1
+            elif util.resolve_node_type(self.node.node_type) == 2 and self.node.team_2_wins == 0:
+                self.node.team_2_wins += 1
             self.loser = self.team_1
 
         # For Round Robin Groups
-        if node.winning_node_id == 0 and node.losing_node_id == 0 and node_group.name == 'Group':
+        if node.winning_node_id == 0 and node.losing_node_id == 0 and 'Group' in node_group.name:
             self.consequences_text = f'{self.team_1.name} are {self.team_1_standing.wins}-{self.team_1_standing.losses}' \
                 f'\n' \
                 f'{self.team_2.name} are {self.team_2_standing.wins}-{self.team_2_standing.losses}'
@@ -311,7 +317,6 @@ class Series:
                 f'{self.team_2.name} have dropped to the lower bracket'
         if node.winning_node_id == 0 and node.losing_node_id == 0 and node_group.name == 'Playoff':
             self.consequences_text = f'Congratulations to {self.winner} for winning {league.name}!'
-        print()
         self.markdown = self.build_md()
 
     def build_md(self):
@@ -322,8 +327,11 @@ class Series:
                           f'{self.node.team_1_wins}-{self.node.team_2_wins} '
                           f'{self.team_2.name}'
                           f'{self.team_2.team_logo}')
-        markdown += md.h2(self.consequences_text)
         markdown += md.divider()
+        markdown += md.link('Spoiler-Free VODS', 'https://www.reddit.com/r/DotaVods/comments/cspxb9/the_international_2019_main_event/')
+        markdown += ' '
+        markdown += md.link('Event Details', 'https://liquipedia.net/dota2/The_International/2019')
+        markdown += md.line_break()
         for match_index, match in enumerate(self.matches):
             markdown += md.h2(md.bold(f'Game {match_index + 1}'))
             markdown += md.h2(f'{match.radiant.team.team_logo}'
@@ -354,62 +362,67 @@ class Series:
             picks_radiant = list()
             picks_dire = list()
 
-            # Phase 1 Bans
-            bans_radiant.append([])
-            bans_dire.append([])
-            for i in range(6):
-                if match.pick_bans[i].team == 0:
-                    bans_radiant[0].append(md.convert_hero(util.resolve_hero(match.pick_bans[i].hero)))
-                else:
-                    bans_dire[0].append(md.convert_hero(util.resolve_hero(match.pick_bans[i].hero)))
-            # Phase 1 Picks
-            picks_radiant.append([])
-            picks_dire.append([])
-            for i in range(6, 10):
-                if match.pick_bans[i].team == 0:
-                    picks_radiant[0].append(md.convert_hero(util.resolve_hero(match.pick_bans[i].hero)))
-                else:
-                    picks_dire[0].append(md.convert_hero(util.resolve_hero(match.pick_bans[i].hero)))
-            # Phase 2 Bans
-            bans_radiant.append([])
-            bans_dire.append([])
-            for i in range(10, 14):
-                if match.pick_bans[i].team == 0:
-                    bans_radiant[1].append(md.convert_hero(util.resolve_hero(match.pick_bans[i].hero)))
-                else:
-                    bans_dire[1].append(md.convert_hero(util.resolve_hero(match.pick_bans[i].hero)))
-            # Phase 2 Picks
-            picks_radiant.append([])
-            picks_dire.append([])
-            for i in range(14, 18):
-                if match.pick_bans[i].team == 0:
-                    picks_radiant[1].append(md.convert_hero(util.resolve_hero(match.pick_bans[i].hero)))
-                else:
-                    picks_dire[1].append(md.convert_hero(util.resolve_hero(match.pick_bans[i].hero)))
-            # Phase 3 Bans
-            bans_radiant.append([])
-            bans_dire.append([])
-            for i in range(18, 20):
-                if match.pick_bans[i].team == 0:
-                    bans_radiant[2].append(md.convert_hero(util.resolve_hero(match.pick_bans[i].hero)))
-                else:
-                    bans_dire[2].append(md.convert_hero(util.resolve_hero(match.pick_bans[i].hero)))
-            # Phase 3 Picks
-            picks_radiant.append([])
-            picks_dire.append([])
-            for i in range(20, 22):
-                if match.pick_bans[i].team == 0:
-                    picks_radiant[2].append(md.convert_hero(util.resolve_hero(match.pick_bans[i].hero)))
-                else:
-                    picks_dire[2].append(md.convert_hero(util.resolve_hero(match.pick_bans[i].hero)))
+            try:
+                # Phase 1 Bans
+                bans_radiant.append([])
+                bans_dire.append([])
+                for i in range(6):
+                    if match.pick_bans[i].team == 0:
+                        bans_radiant[0].append(md.convert_hero(util.resolve_hero(match.pick_bans[i].hero)))
+                    else:
+                        bans_dire[0].append(md.convert_hero(util.resolve_hero(match.pick_bans[i].hero)))
+                # Phase 1 Picks
+                picks_radiant.append([])
+                picks_dire.append([])
+                for i in range(6, 10):
+                    if match.pick_bans[i].team == 0:
+                        picks_radiant[0].append(md.convert_hero(util.resolve_hero(match.pick_bans[i].hero)))
+                    else:
+                        picks_dire[0].append(md.convert_hero(util.resolve_hero(match.pick_bans[i].hero)))
+                # Phase 2 Bans
+                bans_radiant.append([])
+                bans_dire.append([])
+                for i in range(10, 14):
+                    if match.pick_bans[i].team == 0:
+                        bans_radiant[1].append(md.convert_hero(util.resolve_hero(match.pick_bans[i].hero)))
+                    else:
+                        bans_dire[1].append(md.convert_hero(util.resolve_hero(match.pick_bans[i].hero)))
+                # Phase 2 Picks
+                picks_radiant.append([])
+                picks_dire.append([])
+                for i in range(14, 18):
+                    if match.pick_bans[i].team == 0:
+                        picks_radiant[1].append(md.convert_hero(util.resolve_hero(match.pick_bans[i].hero)))
+                    else:
+                        picks_dire[1].append(md.convert_hero(util.resolve_hero(match.pick_bans[i].hero)))
+                # Phase 3 Bans
+                bans_radiant.append([])
+                bans_dire.append([])
+                for i in range(18, 20):
+                    if match.pick_bans[i].team == 0:
+                        bans_radiant[2].append(md.convert_hero(util.resolve_hero(match.pick_bans[i].hero)))
+                    else:
+                        bans_dire[2].append(md.convert_hero(util.resolve_hero(match.pick_bans[i].hero)))
+                # Phase 3 Picks
+                picks_radiant.append([])
+                picks_dire.append([])
+                for i in range(20, 22):
+                    if match.pick_bans[i].team == 0:
+                        picks_radiant[2].append(md.convert_hero(util.resolve_hero(match.pick_bans[i].hero)))
+                    else:
+                        picks_dire[2].append(md.convert_hero(util.resolve_hero(match.pick_bans[i].hero)))
 
-            bans_table.append(['1', str(''.join(bans_radiant[0])), str(''.join(bans_dire[0])), '1'])
-            bans_table.append(['2', str(''.join(bans_radiant[1])), str(''.join(bans_dire[1])), '2'])
-            bans_table.append(['3', str(''.join(bans_radiant[2])), str(''.join(bans_dire[2])), '3'])
+                bans_table.append(['1', str(''.join(bans_radiant[0])), str(''.join(bans_dire[0])), '1'])
+                bans_table.append(['2', str(''.join(bans_radiant[1])), str(''.join(bans_dire[1])), '2'])
+                bans_table.append(['3', str(''.join(bans_radiant[2])), str(''.join(bans_dire[2])), '3'])
 
-            picks_table.append(['1', str(''.join(picks_radiant[0])), str(''.join(picks_dire[0])), '1'])
-            picks_table.append(['2', str(''.join(picks_radiant[1])), str(''.join(picks_dire[1])), '2'])
-            picks_table.append(['3', str(''.join(picks_radiant[2])), str(''.join(picks_dire[2])), '3'])
+                picks_table.append(['1', str(''.join(picks_radiant[0])), str(''.join(picks_dire[0])), '1'])
+                picks_table.append(['2', str(''.join(picks_radiant[1])), str(''.join(picks_dire[1])), '2'])
+                picks_table.append(['3', str(''.join(picks_radiant[2])), str(''.join(picks_dire[2])), '3'])
+            except IndexError:  # This happens when there is an unusual amount of picks or bans
+                markdown += 'There appears to be an unusual amount of picks or bans this game. This usually happens when a team chooses not to ban a hero. Because of this, the picks and bans could not be parsed sucessfully for this match'
+                markdown += md.line_break()
+
             markdown += md.table(bans_table)
             markdown += md.table(picks_table)
             stats_table = list()
@@ -440,7 +453,7 @@ class Series:
             if match.clips:
                 markdown += md.h2('Clips')
                 markdown += md.md_list(match.clips)
+                markdown += md.line_break() + ' '
         markdown += md.line_break()
         markdown += md.italics('This action was performed by a bot. For more information, [see here](https://www.reddit.com/user/d2-match-bot-speaks/comments/c26lfw/introducing_the_dota_2_post_match_bot/). Contact: /u/d2-match-bot-speaks')
-        markdown += md.italics('This new version of the bot has not been properly tested. Please forgive any errors that may occur in the first few series.')
         return markdown

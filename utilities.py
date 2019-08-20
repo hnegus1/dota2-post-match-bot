@@ -1,7 +1,16 @@
-from data import data_access
 import make_request
 import model
-import copy
+from data import data_access
+import praw
+
+r = praw.Reddit(client_id=data_access.get_config("bot_client_id"),
+                client_secret=data_access.get_config("bot_client_secret"),
+                password=data_access.get_config("bot_password"),
+                user_agent=data_access.get_config("bot_user_agent"),
+                username='dota2-post-match-bot')
+
+subreddit = r.subreddit('dota2')
+twitch_clip_bot = r.redditor('DotaClipMatchFinder')
 
 
 def resolve_hero(hero_id):
@@ -32,23 +41,6 @@ def resolve_team(team_id):
         )
 
 
-def resolve_player_name(account_id):
-    players = make_request.get_player_info()
-    if players is None:
-        return False
-    for player in players['player_infos']:
-        if player['account_id'] == account_id:
-            return player['name']
-    return 'Unknown Standin'
-
-
-def resolve_league(league_id):
-    return model.League(
-        name=data_access.get_league_name(league_id),
-        league_id=league_id
-    )
-
-
 def is_potential_final_game(number, team_one_score, team_two_score):
     if number is 2 and team_one_score + team_two_score == 1:
         return True
@@ -58,38 +50,6 @@ def is_potential_final_game(number, team_one_score, team_two_score):
         return True
     if team_two_score == (number / 2) - 0.5:
         return True
-    return False
-
-
-def resolve_series_type(series_type):
-    if series_type == 0:
-        return 1
-    if series_type == 1:
-        return 3
-    if series_type == 2:
-        return 5
-    else:
-        raise Exception('This is a series type I haven\'t seen. Please panic.')
-
-
-def team_one_is_radiant(live_match):
-    tracked_series = data_access.get_tracked_series()
-    for series in tracked_series:
-        if (series['live_team_one']['team']['team_id'] == live_match.radiant_live_team.team.team_id and
-            series['live_team_two']['team']['team_id'] == live_match.dire_live_team.team.team_id) or \
-                (series['live_team_one']['team']['team_id'] == live_match.dire_live_team.team.team_id and
-                 series['live_team_two']['team']['team_id'] == live_match.radiant_live_team.team.team_id):
-            if series['live_team_one']['team']['team_id'] == live_match.radiant_live_team.team.team_id:
-                return True
-            else:
-                return False
-
-
-def game_is_tracked(live_match):
-    matches = data_access.get_tracked_series()
-    for match in matches:
-        if live_match.match_id == match.match_id:
-            return True
     return False
 
 
@@ -148,29 +108,6 @@ def resolve_region(region_number):
         return 'South-East Asia'
 
 
-def resolve_broadcast_platform(platform_number):
-    if platform_number is None:
-        return None
-    if platform_number is 1:
-        return 'Steam TV'
-    if platform_number is 2:
-        return 'Twitch'
-    if platform_number is 100:
-        return 'Other'
-    return 'Unknown Platform'
-
-
-def resolve_language(language_number):
-    if language_number is None:
-        return None
-    if language_number is 0:
-        return 'English'
-    if language_number is 6:
-        return 'Chinese'
-    if language_number is 8:
-        return 'Russian'
-
-
 def resolve_phase(phase_number):
     if phase_number is None:
         return None
@@ -224,3 +161,12 @@ def get_node_group(node_groups, node_group_id):
             return correct_node_group
 
 
+def get_twitch_clips(match_id):
+    clips = [x for x in list(map(lambda comment: f'[{comment.submission.title}]({comment.submission.url})'
+             if str(match_id) in comment.body else None, twitch_clip_bot.comments.new())) if x]
+    print(clips)
+    return clips
+
+
+class APIDownException(Exception):
+    pass
