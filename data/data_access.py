@@ -1,5 +1,6 @@
 import json
 import os
+import datetime
 
 
 def open_json_file_r(path):
@@ -33,7 +34,8 @@ def add_team(team):
     teams.append({
         "name": team.name,
         "team_id": team.team_id,
-        "team_logo": team.team_logo
+        "team_logo": team.team_logo,
+        "last_played": team.last_played
     })
     json.dumps(teams)
     open_json_file_w('/data/teams.json', teams)
@@ -80,4 +82,15 @@ def track_match_node(**kwargs):
     live_games.append(kwargs)
     json.dumps(live_games)
     open_json_file_w('/data/tracked_series.json', live_games)
+
+
+def set_team_last_played(team):
+    teams = open_json_file_r('/data/teams.json')
+    for tm in teams:
+        if tm['team_id'] == team.team_id:
+            tm['last_played'] = str(datetime.datetime.now().timestamp())
+    json.dumps(teams)
+    open_json_file_w('/data/teams.json', teams)
+
+
 

@@ -90,9 +90,15 @@ class NodeGroup:
     def fix_nodes(self):
         # Add direct object links to the winning nodes. Add bracket types.
         for node in self.nodes:
-            if self.phase == 'Playoffs':
-                if hasattr(node, 'losing_node'):
-                    node.bracket_type = 'Upper Bracket'
+            if util.resolve_phase(self.phase) == 'Playoffs':
+                if hasattr(node, 'losing_node_id'):
+                    if node.losing_node_id != 0:
+                        node.bracket_type = 'Upper Bracket'
+                    else:
+                        if node.winning_node_id == 0:
+                            node.bracket_type = 'Grand Final'
+                        else:
+                            node.bracket_type = 'Lower Bracket'
                 else:
                     node.bracket_type = 'Lower Bracket'
             else:
@@ -114,7 +120,7 @@ class NodeGroup:
 
         # Assign each node a round number and a name
         for node in self.nodes:
-            set_round(1, node)
+            set_round(util.get_node_depth(self, node, 1), node)
             set_name(node)
 
     def __str__(self):
@@ -253,6 +259,7 @@ class Team:
         self.name = kwargs['name']
         self.team_id = kwargs['team_id']
         self.team_logo = kwargs['team_logo']
+        self.last_played = datetime.datetime.fromtimestamp(float(kwargs['last_played']))
 
     def __str__(self):
         return self.name
@@ -265,7 +272,7 @@ class Series:
         self.matches = matches
         self.team_1 = node.team_1
         self.team_2 = node.team_2
-        self.title = f'{league.name} {node_group.name} / {node.name} / Post-Match Crowd Discussion'
+        self.title = f'{league.name} {node_group.name} / {node.name} / Post-Match Discussion'
         self.team_1_standing = [x for x in list(map(lambda x: x if self.team_1.team_id == x.team.team_id else None, node_group.team_standings)) if x][0]
         self.team_2_standing = [x for x in list(map(lambda x: x if self.team_2.team_id == x.team.team_id else None, node_group.team_standings)) if x][0]
         self.winner = winner
@@ -273,18 +280,12 @@ class Series:
 
         # Make up a different title if the team has already played in the same day
         if node_group.name == 'Playoff':
-            incoming_node_1 = None
-            incoming_node_2 = None
-        if self.node.incoming_node_id_1 is not None:
-            incoming_node_1 = util.get_league_node(league, self.node.incoming_node_id_1)
-            if datetime.datetime.fromtimestamp(self.node.actual_time).day == datetime.datetime.fromtimestamp(incoming_node_1.actual_time).day:
-                # It's the same day so set another title
+            if util.team_has_played_today(self.team_1) and util.team_has_played_today(self.team_2):
                 self.title = f'{league.name} {node_group.name} / Post-Match Discussion'
-        if self.node.incoming_node_id_2 is not None:
-            incoming_node_2 = util.get_league_node(league, self.node.incoming_node_id_2)
-            if datetime.datetime.fromtimestamp(self.node.actual_time).day == datetime.datetime.fromtimestamp(incoming_node_2.actual_time).day:
-                # It's the same day so set another title
-                self.title = f'{league.name} {node_group.name} / Post-Match Discussion'
+            elif util.team_has_played_today(self.team_1):
+                self.title = f'{league.name} {node_group.name} / ??? vs {node.team_2} / Post-Match Discussion'
+            elif util.team_has_played_today(self.team_2):
+                self.title = f'{league.name} {node_group.name} / {node.team_1} vs ??? / Post-Match Discussion'
 
         if self.winner.team_id == self.team_1.team_id:
             if util.resolve_node_type(self.node.node_type) == 2 and self.node.team_1_wins == 0:
@@ -300,24 +301,9 @@ class Series:
                 self.node.team_2_wins += 1
             self.loser = self.team_1
 
-        # For Round Robin Groups
-        if node.winning_node_id == 0 and node.losing_node_id == 0 and 'Group' in node_group.name:
-            self.consequences_text = f'{self.team_1.name} are {self.team_1_standing.wins}-{self.team_1_standing.losses}' \
-                f'\n' \
-                f'{self.team_2.name} are {self.team_2_standing.wins}-{self.team_2_standing.losses}'
-        # For Tournaments - Upper Bracket
-        if node.winning_node_id != 0 and node.losing_node_id == 0 and node_group.name == 'Playoff':
-            self.consequences_text = f'{self.team_1.name} have advanced to the next winners round' \
-                f'\n' \
-                f'{self.team_2.name} have been eliminated from {league.name}'
-        # For Tournaments - Upper Bracket
-        if node.winning_node_id != 0 and node.losing_node_id != 0 and node_group.name == 'Playoff':
-            self.consequences_text = f'{self.team_1.name} have advanced to the next upper bracket round' \
-                f'\n' \
-                f'{self.team_2.name} have dropped to the lower bracket'
-        if node.winning_node_id == 0 and node.losing_node_id == 0 and node_group.name == 'Playoff':
-            self.consequences_text = f'Congratulations to {self.winner} for winning {league.name}!'
         self.markdown = self.build_md()
+        util.set_team_last_played(self.team_1)
+        util.set_team_last_played(self.team_2)
 
     def build_md(self):
         markdown = ''
@@ -420,7 +406,7 @@ class Series:
                 picks_table.append(['2', str(''.join(picks_radiant[1])), str(''.join(picks_dire[1])), '2'])
                 picks_table.append(['3', str(''.join(picks_radiant[2])), str(''.join(picks_dire[2])), '3'])
             except IndexError:  # This happens when there is an unusual amount of picks or bans
-                markdown += 'There appears to be an unusual amount of picks or bans this game. This usually happens when a team chooses not to ban a hero. Because of this, the picks and bans could not be parsed sucessfully for this match'
+                markdown += 'There appears to be an unusual amount of picks or bans this game. This usually happens when a team chooses not to ban a hero. Because of this, the picks and bans could not be parsed successfully for this match'
                 markdown += md.line_break()
 
             markdown += md.table(bans_table)
