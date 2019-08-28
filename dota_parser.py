@@ -48,4 +48,4 @@ def track_live_series():
         print('API IS DOWN')
         pass
     except TypeError:
-        print('API IS DOWN')
+        print('API IS DOWN OR YOU HAVE MADE A BIG MISTAKE')

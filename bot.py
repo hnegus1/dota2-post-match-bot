@@ -20,7 +20,7 @@ def run_bot():
     while True:
         operate_bot()
         print('Boop')
-        time.sleep(60)
+        time.sleep(30)
 
 
 def operate_bot():

@@ -2,6 +2,8 @@ import make_request
 import model
 from data import data_access
 import praw
+import re
+import datetime
 
 r = praw.Reddit(client_id=data_access.get_config("bot_client_id"),
                 client_secret=data_access.get_config("bot_client_secret"),
@@ -29,7 +31,8 @@ def resolve_team(team_id):
         data_access.add_team(model.Team(
             team_id=team_id,
             name=name,
-            team_logo=f'[](/logo-dota \"{name}\")'
+            team_logo=f'[](/logo-dota \"{name}\")',
+            last_played='0'
         ))
         resolve_team(team_id)
     else:
@@ -37,7 +40,8 @@ def resolve_team(team_id):
         return model.Team(
             team_id=team['team_id'],
             name=team['name'],
-            team_logo=team['team_logo']
+            team_logo=team['team_logo'],
+            last_played=team['last_played']
         )
 
 
@@ -140,6 +144,12 @@ def get_league_node(league, node_id):
             return correct_node
 
 
+def get_league_node_in_group(node_group, node_id):
+    correct_node = search_node_group(node_group, node_id)
+    if correct_node is not None:
+        return correct_node[0]
+
+
 def search_node_group(node_group, node_id):
     for deep_node_group in node_group.node_groups:
         correct_node = search_node_group(deep_node_group, node_id)
@@ -166,6 +176,33 @@ def get_twitch_clips(match_id):
              if str(match_id) in comment.body else None, twitch_clip_bot.comments.new())) if x]
     print(clips)
     return clips
+
+
+def get_node_depth(node_group, node, current_depth):
+    if node.incoming_node_id_2 is not None:
+        return get_node_depth(node_group, get_league_node_in_group(node_group, node.incoming_node_id_2), current_depth + 1)
+    else:
+        return current_depth
+
+
+def get_league_nodes_in_group_by_round(node_group, round_number):
+    nodes = []
+    for node in node_group:
+        if int(re.findall(r'\d+', node.name)[0]) == round_number:
+            nodes.append(node)
+    return nodes
+
+
+def team_has_played_today(team):
+    if datetime.datetime.now().day == team.last_played.day and \
+            datetime.datetime.now().month == team.last_played.month and \
+            datetime.datetime.now().year == team.last_played.year:
+        return True
+    return False
+
+
+def set_team_last_played(team):
+    data_access.set_team_last_played(team)
 
 
 class APIDownException(Exception):

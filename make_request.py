@@ -125,5 +125,3 @@ def get_team_name_from_id(team_id):
         return request['data']['team']['name']
     except TypeError:
         return 'Unknown Team'
-
-# print(json.dumps(get_live_league_games(), indent=4, sort_keys=True))
