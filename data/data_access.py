@@ -35,7 +35,7 @@ def add_team(team):
         "name": team.name,
         "team_id": team.team_id,
         "team_logo": team.team_logo,
-        "last_played": team.last_played
+        "last_played": 0
     })
     json.dumps(teams)
     open_json_file_w('/data/teams.json', teams)
