@@ -47,5 +47,5 @@ def track_live_series():
     except util.APIDownException:
         print('API IS DOWN')
         pass
-    except TypeError:
-        print('API IS DOWN OR YOU HAVE MADE A BIG MISTAKE')
+    # except TypeError:
+    #     print('API IS DOWN OR YOU HAVE MADE A BIG MISTAKE')

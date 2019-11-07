@@ -32,7 +32,7 @@ def resolve_team(team_id):
             team_id=team_id,
             name=name,
             team_logo=f'[](/logo-dota \"{name}\")',
-            last_played='0'
+            last_played="0"
         ))
         resolve_team(team_id)
     else:

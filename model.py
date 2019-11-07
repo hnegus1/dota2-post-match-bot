@@ -287,17 +287,19 @@ class Series:
             elif util.team_has_played_today(self.team_2):
                 self.title = f'{league.name} {node_group.name} / {node.team_1} vs ??? / Post-Match Discussion'
 
+        # To get the no of games to win a series, get the BO number, divide by 2 and add 0.5.
+        # EG a BO5 is (5/2)+0.5 = 3 or BO1 is (1/2)+0.5
         if self.winner.team_id == self.team_1.team_id:
             if util.resolve_node_type(self.node.node_type) == 2 and self.node.team_1_wins == 0:
                 self.node.team_1_wins += 1
-            elif self.node.team_1_wins != util.resolve_node_type(self.node.node_type):
+            elif self.node.team_1_wins != (util.resolve_node_type(self.node.node_type) / 2) + 0.5:
                 self.node.team_1_wins += 1
 
             self.loser = self.team_2
         else:
-            if self.node.team_2_wins != util.resolve_node_type(self.node.node_type):
+            if util.resolve_node_type(self.node.node_type) == 2 and self.node.team_2_wins == 0:
                 self.node.team_2_wins += 1
-            elif util.resolve_node_type(self.node.node_type) == 2 and self.node.team_2_wins == 0:
+            elif self.node.team_2_wins != (util.resolve_node_type(self.node.node_type) / 2) + 0.5:
                 self.node.team_2_wins += 1
             self.loser = self.team_1
 
@@ -314,9 +316,9 @@ class Series:
                           f'{self.team_2.name}'
                           f'{self.team_2.team_logo}')
         markdown += md.divider()
-        markdown += md.link('Spoiler-Free VODS', 'https://www.reddit.com/r/DotaVods/comments/cspxb9/the_international_2019_main_event/')
+        markdown += md.link('Spoiler-Free VODS', 'https://www.reddit.com/r/DotaVods/comments/dswicq/dota_summit_11/')
         markdown += ' '
-        markdown += md.link('Event Details', 'https://liquipedia.net/dota2/The_International/2019')
+        markdown += md.link('Event Details', 'https://liquipedia.net/dota2/The_Summit/11')
         markdown += md.line_break()
         for match_index, match in enumerate(self.matches):
             markdown += md.h2(md.bold(f'Game {match_index + 1}'))
